@@ -7,6 +7,4 @@ import lombok.Setter;
 @Setter
 public class Expense extends BaseModel{
     private int amount;
-    private String owedTo;
-    private String owedBy;
 }
