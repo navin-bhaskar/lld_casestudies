@@ -27,19 +27,15 @@ public class ExpenseHandler {
 
     public void generateTransaction() {
         System.out.println("Final totals: ");
-        PriorityQueue<UserExpense> maxq = new PriorityQueue<UserExpense>(50, new Comparator<UserExpense>() {
+        Comparator<UserExpense> cmp = new Comparator<UserExpense>() {
             @Override
             public int compare(UserExpense o1, UserExpense o2) {
                 return o1.getAmount() - o2.getAmount();
             }
-        });
+        };
+        PriorityQueue<UserExpense> maxq = new PriorityQueue<UserExpense>(50, cmp);
 
-        PriorityQueue<UserExpense> minq = new PriorityQueue<UserExpense>(50, new Comparator<UserExpense>() {
-            @Override
-            public int compare(UserExpense o1, UserExpense o2) {
-                return o1.getAmount() - o2.getAmount();
-            }
-        });
+        PriorityQueue<UserExpense> minq = new PriorityQueue<UserExpense>(50, cmp);
         for(String usr: userExp.keySet()) {
             UserExpense curUserExp = userExp.get(usr);
             String userName = users.get(usr).getName();
