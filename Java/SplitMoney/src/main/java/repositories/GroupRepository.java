@@ -16,7 +16,7 @@ public class GroupRepository {
         if (groupNameMap.containsKey(grp.getName())) {
             throw new GroupAlreadyInRepo();
         }
-        String grpAlias = "u" + groupAliasCnt;
+        String grpAlias = "g" + groupAliasCnt;
         groupNameMap.put(grpAlias, grp);
         grp.setAlias(grpAlias);
         groupAliasCnt += 1;

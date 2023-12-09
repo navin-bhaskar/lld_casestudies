@@ -11,6 +11,7 @@ public class CommandHandler {
         commands = new ArrayList<>();
         commands.add(new Register());
         commands.add(new UpdateProfile());
+        commands.add(new AddGroup());
 
         for(Command cmd: commands) {
             helpStr = helpStr.concat(cmd.help());
