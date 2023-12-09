@@ -1,6 +1,5 @@
-package Services;
+package services;
 
-import models.Expense;
 import models.User;
 import models.UserExpense;
 
@@ -15,14 +14,16 @@ public class ExpenseHandler {
         userExp = new HashMap<>();
 
         for (String user: users.keySet()){
-            userExp.put(user, new UserExpense(users.get(user)));
+            UserExpense usrExp = new UserExpense();
+            usrExp.setUser(users.get(user));
+            userExp.put(user, new UserExpense());
         }
     }
 
     public void addExpense(String usr, int amt) {
         UserExpense uExp = userExp.get(usr);
-        int finalAmount = uExp.getAmount() + amt;
-        uExp.setAmount(finalAmount);
+        int finalAmount = uExp.getExpense().getAmount() + amt;
+        uExp.getExpense().setAmount(finalAmount);
     }
 
     public void generateTransaction() {
@@ -30,7 +31,7 @@ public class ExpenseHandler {
         Comparator<UserExpense> cmp = new Comparator<UserExpense>() {
             @Override
             public int compare(UserExpense o1, UserExpense o2) {
-                return o1.getAmount() - o2.getAmount();
+                return o1.getExpense().getAmount() - o2.getExpense().getAmount();
             }
         };
         PriorityQueue<UserExpense> maxq = new PriorityQueue<UserExpense>(50, cmp);
@@ -39,7 +40,7 @@ public class ExpenseHandler {
         for(String usr: userExp.keySet()) {
             UserExpense curUserExp = userExp.get(usr);
             String userName = users.get(usr).getName();
-            int amt = userExp.get(usr).getAmount();
+            int amt = userExp.get(usr).getExpense().getAmount();
             System.out.println("User " + userName + "("+ usr + ")="+ amt);
             if (amt < 0) {
                 minq.add(curUserExp);
@@ -52,17 +53,17 @@ public class ExpenseHandler {
         while (maxq.size() > 0 && minq.size() > 0) {
             UserExpense maxAmtUser = maxq.poll();
             UserExpense minAmtUser = minq.poll();
-            int diffAmt = maxAmtUser.getAmount() + minAmtUser.getAmount();
+            int diffAmt = maxAmtUser.getExpense().getAmount() + minAmtUser.getExpense().getAmount();
             String msg =  minAmtUser.getUser().getName() +
                     " pays " +
                     maxAmtUser.getUser().getName() +
-                    " amount " + -minAmtUser.getAmount();
+                    " amount " + -minAmtUser.getExpense().getAmount();
             System.out.println(msg);
-            if ((maxAmtUser.getAmount() + minAmtUser.getAmount())  > 0 ){
-                maxAmtUser.setAmount(diffAmt);
+            if ((maxAmtUser.getExpense().getAmount() + minAmtUser.getExpense().getAmount())  > 0 ){
+                maxAmtUser.getExpense().setAmount(diffAmt);
                 maxq.add(maxAmtUser);
             } else {
-                minAmtUser.setAmount(-diffAmt);
+                minAmtUser.getExpense().setAmount(-diffAmt);
                 minq.add(minAmtUser);
             }
         }
