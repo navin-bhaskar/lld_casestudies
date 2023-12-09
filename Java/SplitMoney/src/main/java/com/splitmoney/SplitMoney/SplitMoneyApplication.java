@@ -1,14 +1,14 @@
 package com.splitmoney.SplitMoney;
 
-import Services.ExpenseHandler;
+import org.aspectj.runtime.reflect.Factory;
+import services.CommandHandler.commands.CommandHandler;
+import services.ExpenseHandler;
 import models.User;
-import models.UserExpense;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
 
@@ -21,6 +21,24 @@ public class SplitMoneyApplication implements CommandLineRunner {
 
 	@Override
 	public void run(String... args) throws Exception {
+		CommandHandler cmdHandler = new CommandHandler();
+		Scanner sc = new Scanner(System.in);
+		while (true) {
+			System.out.println("Enter a command, h for help and q to quit: ");
+			String cmd = sc.nextLine();
+			if(cmd.equalsIgnoreCase("q")) {
+				break;
+			} else if (cmd.equalsIgnoreCase("h")) {
+				System.out.println(cmdHandler.getHelp());
+			} else {
+				cmdHandler.executeCmdStr(cmd);
+			}
+		}
+
+	}
+
+	// TODO: Test code for transaction, move it to test class
+	public void test_transaction() {
 		Map<String, User> users = new HashMap<>();
 
 		Scanner sc = new Scanner(System.in);
