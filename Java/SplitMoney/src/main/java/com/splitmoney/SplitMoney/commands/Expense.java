@@ -1,8 +1,6 @@
 package com.splitmoney.splitmoney.commands;
 
 import com.splitmoney.splitmoney.controllers.ExpenseController;
-import com.splitmoney.splitmoney.services.ExpenseService;
-import com.splitmoney.splitmoney.services.UserService;
 import dtos.AddExpenseRequestDto;
 import dtos.AddExpenseResponseDto;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,6 +19,7 @@ public class Expense implements Command {
     final private String desc = "desc";
     final private String distributionTypeEqual = "equal";
     final private String distributionTypePercent = "percent";
+    final private String distributionTypeExact = "exact";
     final private String distributionTypeRatio = "ratio";
 
     private int parseIdx=0;
@@ -40,6 +39,7 @@ public class Expense implements Command {
     @Override
     public boolean check(String cmdStr) {
         words = cmdStr.split(" ");
+        parseIdx = 0;
         return words[1].equalsIgnoreCase(command);
         // TODO: add more check
     }
@@ -169,6 +169,8 @@ public class Expense implements Command {
                 int curAmt = (int) ((percent / 100.0) * totalAmountPaid);
                 owedAmount.add(curAmt);
             }
+        } else if (distributionType.equalsIgnoreCase(distributionTypeExact)) {
+            owedAmount = getInts();
         }
 //        } else {
 //            // TODO: Unknown option, raise error

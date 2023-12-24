@@ -1,27 +1,39 @@
-package com.splitmoney.SplitMoney;
+package com.splitmoney.splitmoney;
 
-import org.aspectj.runtime.reflect.Factory;
-import services.CommandHandler.commands.CommandHandler;
-import services.ExpenseHandler;
-import models.User;
+import com.splitmoney.splitmoney.commands.CommandHandler;
+import com.splitmoney.splitmoney.services.ExpenseService;
+import com.splitmoney.splitmoney.models.User;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.autoconfigure.domain.EntityScan;
+import org.springframework.context.annotation.ComponentScan;
+import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
+import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Scanner;
 
 @SpringBootApplication
+@EntityScan(basePackages = "com.splitmoney.splitmoney.models")
+@EnableJpaRepositories(basePackages = "com.splitmoney.splitmoney.repositories")
+@ComponentScan(basePackages = "com.splitmoney.splitmoney.commands")
+@EnableJpaAuditing
 public class SplitMoneyApplication implements CommandLineRunner {
+	private final CommandHandler commandHandler;
 
 	public static void main(String[] args) {
 		SpringApplication.run(SplitMoneyApplication.class, args);
 	}
 
+	public SplitMoneyApplication(CommandHandler commandHandler) {
+		this.commandHandler = commandHandler;
+	}
+
 	@Override
 	public void run(String... args) throws Exception {
-		CommandHandler cmdHandler = new CommandHandler();
+
 		Scanner sc = new Scanner(System.in);
 		while (true) {
 			System.out.println("Enter a command, h for help and q to quit: ");
@@ -29,74 +41,13 @@ public class SplitMoneyApplication implements CommandLineRunner {
 			if(cmd.equalsIgnoreCase("q")) {
 				break;
 			} else if (cmd.equalsIgnoreCase("h")) {
-				System.out.println(cmdHandler.getHelp());
+				System.out.println(commandHandler.getHelp());
 			} else {
-				cmdHandler.executeCmdStr(cmd);
+				commandHandler.executeCmdStr(cmd);
 			}
 		}
 
 	}
 
-	// TODO: Test code for transaction, move it to test class
-	public void test_transaction() {
-		Map<String, User> users = new HashMap<>();
-
-		Scanner sc = new Scanner(System.in);
-		System.out.println("Add users");
-		System.out.println("q to exit");
-
-		boolean acceptingUsers = true;
-		int cnt=1;
-		while (acceptingUsers) {
-			String userName = sc.next();
-			if(userName.equals("q") || userName.equals("Q")) {
-				acceptingUsers = false;
-				continue;
-			}
-			if(users.containsKey(userName)) {
-				System.out.println("User with given name already exists");
-			} else {
-				User usr = new User();
-				String genUsrName = "u" + cnt;
-				usr.setName(userName);
-				users.put(genUsrName, usr);
-				cnt += 1;
-			}
-		}
-
-		for(String u: users.keySet()) {
-			System.out.println("Name: " + users.get(u).getName() + " Alias: " + u);
-		}
-
-		ExpenseHandler expHandler = new ExpenseHandler(users);
-
-		System.out.println("How many transactions do you wish to enter? ");
-		int entries = sc.nextInt();
-
-		for(int i=0; i<entries; i++) {
-			System.out.println("How many people paid?");
-			int paid = sc.nextInt();
-
-			for(int j=0; j<paid; j++) {
-				System.out.println("Enter alias of owed to: ");
-				String owedTo = sc.next();
-				int amt;
-				System.out.println("Enter amount: ");
-				amt = sc.nextInt();
-				expHandler.addExpense(owedTo, amt);
-			}
-
-			System.out.println("How many people owed this money");
-			int n = sc.nextInt();
-			for(int k=0; k<n; k++) {
-				System.out.println("Enter alias of owed by: ");
-				String owedBy = sc.next();
-				System.out.println("Enter amount: ");
-				int amt = sc.nextInt();
-				expHandler.addExpense(owedBy, -amt);
-			}
-		}
-		expHandler.generateTransaction();
-	}
 
 }

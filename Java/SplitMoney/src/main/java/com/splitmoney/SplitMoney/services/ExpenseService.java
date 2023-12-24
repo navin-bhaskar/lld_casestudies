@@ -1,9 +1,7 @@
 package com.splitmoney.splitmoney.services;
 
-import com.splitmoney.splitmoney.models.Expense;
-import com.splitmoney.splitmoney.models.User;
-import com.splitmoney.splitmoney.models.UserExpense;
-import com.splitmoney.splitmoney.models.UserExpenseType;
+import com.splitmoney.splitmoney.exceptions.UserNotFound;
+import com.splitmoney.splitmoney.models.*;
 import com.splitmoney.splitmoney.repositories.ExpenseRepository;
 import com.splitmoney.splitmoney.repositories.UserExpenseRepository;
 import com.splitmoney.splitmoney.repositories.UserRepository;
@@ -11,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 public class ExpenseService {
@@ -26,16 +25,6 @@ public class ExpenseService {
     @Autowired
     private UserExpenseRepository userExpenseRepository;
 
-    public ExpenseService(Map<String, User> usersMap) {
-        this.users = usersMap;
-        userExp = new HashMap<>();
-
-        for (String user: users.keySet()){
-            UserExpense usrExp = new UserExpense();
-            usrExp.setUser(users.get(user));
-            userExp.put(user, new UserExpense());
-        }
-    }
 
     public void addExpense(
             User createdBy,
@@ -64,50 +53,103 @@ public class ExpenseService {
 
     }
 
+    public List<Transaction> settleUser(User usr) {
+        List<Expense> expenses = expenseRepository.findAllByUserExpensesUser(usr);
+        List<Transaction> allTransactions =  generateTransaction(expenses);
+        return allTransactions.stream().filter(t ->
+                Objects.equals(t.getOwedBy().getId(), usr.getId()) ||
+                        Objects.equals(t.getOwedTo().getId(), usr.getId())).collect(Collectors.toList());
+    }
 
+    public List<Transaction> generateTransaction(List<Expense> expenses) {
+        HashMap<Long, Integer> userExpenseMap = new HashMap<>();
+        HashMap<Long, User> userCache = new HashMap<>();
+        computeTotals(expenses, userExpenseMap, userCache);
 
-    public void generateTransaction() {
-        System.out.println("Final totals: ");
+        return getTransactions(userExpenseMap, userCache);
+    }
+
+    private static List<Transaction> getTransactions(
+            HashMap<Long, Integer> userExpenseMap,
+            HashMap<Long, User> userCache) {
+
         Comparator<UserExpense> cmp = new Comparator<>() {
             @Override
             public int compare(UserExpense o1, UserExpense o2) {
-                return o1.getExpense().getAmount() - o2.getExpense().getAmount();
+                return o1.getAmount() - o2.getAmount();
             }
         };
         PriorityQueue<UserExpense> maxq = new PriorityQueue<UserExpense>(50, cmp);
-
         PriorityQueue<UserExpense> minq = new PriorityQueue<UserExpense>(50, cmp);
-        for(String usr: userExp.keySet()) {
-            UserExpense curUserExp = userExp.get(usr);
-            String userName = users.get(usr).getName();
-            int amt = userExp.get(usr).getExpense().getAmount();
-            System.out.println("User " + userName + "("+ usr + ")="+ amt);
-            if (amt < 0) {
-                minq.add(curUserExp);
-            } else {
-                maxq.add(curUserExp);
-            }
-        }
 
-        System.out.println("----------Transactions----------------");
+        prepareHeaps(userExpenseMap, userCache, maxq, minq);
+        return getTransactionList(maxq, minq);
+    }
+
+    private static List<Transaction> getTransactionList(PriorityQueue<UserExpense> maxq, PriorityQueue<UserExpense> minq) {
+        List<Transaction> transactions = new ArrayList<>();
         while (maxq.size() > 0 && minq.size() > 0) {
             UserExpense maxAmtUser = maxq.poll();
             UserExpense minAmtUser = minq.poll();
-            int diffAmt = maxAmtUser.getExpense().getAmount() + minAmtUser.getExpense().getAmount();
-            String msg =  minAmtUser.getUser().getName() +
-                    " pays " +
-                    maxAmtUser.getUser().getName() +
-                    " amount " + -minAmtUser.getExpense().getAmount();
-            System.out.println(msg);
-            if ((maxAmtUser.getExpense().getAmount() + minAmtUser.getExpense().getAmount())  > 0 ){
-                maxAmtUser.getExpense().setAmount(diffAmt);
+            int diffAmt = maxAmtUser.getAmount() + minAmtUser.getAmount();
+            Transaction t = getTransaction(maxAmtUser, minAmtUser);
+            transactions.add(t);
+            if ((maxAmtUser.getAmount() + minAmtUser.getAmount())  > 0 ){
+                maxAmtUser.setAmount(diffAmt);
                 maxq.add(maxAmtUser);
             } else {
-                minAmtUser.getExpense().setAmount(-diffAmt);
+                minAmtUser.setAmount(-diffAmt);
                 minq.add(minAmtUser);
             }
         }
+        return transactions;
+    }
 
+    private static Transaction getTransaction(UserExpense maxAmtUser, UserExpense minAmtUser) {
+        Transaction t = new Transaction();
+        t.setAmt(-minAmtUser.getAmount());
+        t.setOwedBy(minAmtUser.getUser());
+        t.setOwedTo(maxAmtUser.getUser());
+        return t;
+    }
+
+    private static void prepareHeaps(
+            HashMap<Long, Integer> userExpenseMap,
+            HashMap<Long, User> userCache,
+            PriorityQueue<UserExpense> maxq,
+            PriorityQueue<UserExpense> minq) {
+        for(Long usrId: userExpenseMap.keySet()) {
+            int amt = userExpenseMap.get(usrId);
+            UserExpense temp = new UserExpense();
+            temp.setUser(userCache.get(usrId));
+            temp.setAmount(amt);
+            if (amt < 0) {
+                minq.add(temp);
+            } else if(amt > 0) {
+                maxq.add(temp);
+            }
+        }
+    }
+
+    private static void computeTotals(
+            List<Expense> expenses,
+            HashMap<Long, Integer> userExpenseMap,
+            HashMap<Long, User> userCache) {
+        for(Expense exp: expenses) {
+            for(UserExpense usrExp: exp.getUserExpenses()) {
+                Long userId = usrExp.getUser().getId();
+                if(!userExpenseMap.containsKey(userId)) {
+                    userExpenseMap.put(userId, 0);
+                    userCache.put(userId, usrExp.getUser());
+                }
+                int curAmt = userExpenseMap.get(userId);
+                if(usrExp.getUsrExpType() == UserExpenseType.WHO_PAID) {
+                    userExpenseMap.put(userId, curAmt + usrExp.getAmount());
+                } else {
+                    userExpenseMap.put(userId, curAmt - usrExp.getAmount());
+                }
+            }
+        }
     }
 
 

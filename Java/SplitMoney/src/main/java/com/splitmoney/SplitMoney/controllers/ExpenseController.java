@@ -1,13 +1,13 @@
 package com.splitmoney.splitmoney.controllers;
 
+import com.splitmoney.splitmoney.exceptions.UserNotFound;
+import com.splitmoney.splitmoney.models.Transaction;
 import com.splitmoney.splitmoney.models.User;
 import com.splitmoney.splitmoney.models.UserExpense;
 import com.splitmoney.splitmoney.models.UserExpenseType;
 import com.splitmoney.splitmoney.services.ExpenseService;
 import com.splitmoney.splitmoney.services.UserService;
-import dtos.AddExpenseRequestDto;
-import dtos.AddExpenseResponseDto;
-import dtos.ResponseStatus;
+import dtos.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 
@@ -92,6 +92,22 @@ public class ExpenseController {
                 usersWhoHadToPay);
         resp.setStatus(ResponseStatus.SUCCESS);
         resp.setMessage("Added expense successfully");
+        return resp;
+    }
+
+    public SettleUserResponseDto settleUser(SettleUserRequestDto request) {
+        SettleUserResponseDto resp = new SettleUserResponseDto();
+        Optional<User> usr = userService.findByAlias(request.getUser());
+        List<Transaction> transactions;
+
+        if(usr.isEmpty()) {
+            resp.setMessage(UserService.getUsrNotFoundMsg(request.getUser()));
+            resp.setStatus(ResponseStatus.FAILURE);
+            return resp;
+        }
+        transactions = this.expenseService.settleUser(usr.get());
+        resp.setStatus(ResponseStatus.SUCCESS);
+        resp.setTransactions(transactions);
         return resp;
     }
 }
