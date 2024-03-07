@@ -1,0 +1,4 @@
+u1 Expense u2 u3 u4 MultiPay 1000 1000 0 0 Exact 500 500 500 500 Desc Exp1
+u1 Expense u2 u3 u4 MultiPay 3000 0 0 0 Exact 1000 200 800 1000 Desc Exp2
+u3 Expense u1 u2 u4 MultiPay 500 0 0 800 Exact 200 500 100 500 Desc Exp3
+u4 Expense u1 u2 u3 MultiPay 1000 0 0 0 Exact 250 250 250 250 Desc Exp4
