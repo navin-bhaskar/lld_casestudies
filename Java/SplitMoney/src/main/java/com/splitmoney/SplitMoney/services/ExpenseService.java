@@ -61,6 +61,11 @@ public class ExpenseService {
                         Objects.equals(t.getOwedTo().getId(), usr.getId())).collect(Collectors.toList());
     }
 
+    public List<Transaction> settleGroup(Group group) {
+        List<Expense> expenses = group.getExpenses();
+        return generateTransaction(expenses);
+    }
+
     public List<Transaction> generateTransaction(List<Expense> expenses) {
         HashMap<Long, Integer> userExpenseMap = new HashMap<>();
         HashMap<Long, User> userCache = new HashMap<>();
@@ -73,12 +78,7 @@ public class ExpenseService {
             HashMap<Long, Integer> userExpenseMap,
             HashMap<Long, User> userCache) {
 
-        Comparator<UserExpense> cmp = new Comparator<>() {
-            @Override
-            public int compare(UserExpense o1, UserExpense o2) {
-                return o1.getAmount() - o2.getAmount();
-            }
-        };
+        Comparator<UserExpense> cmp = (o1, o2) -> o1.getAmount() - o2.getAmount();
         PriorityQueue<UserExpense> maxq = new PriorityQueue<UserExpense>(50, cmp);
         PriorityQueue<UserExpense> minq = new PriorityQueue<UserExpense>(50, cmp);
 

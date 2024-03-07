@@ -4,9 +4,7 @@ import com.splitmoney.splitmoney.models.Group;
 import com.splitmoney.splitmoney.models.User;
 import com.splitmoney.splitmoney.services.GroupService;
 import com.splitmoney.splitmoney.services.UserService;
-import dtos.AddGroupRequestDto;
-import dtos.AddGroupResponseDto;
-import dtos.ResponseStatus;
+import dtos.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 
@@ -52,6 +50,43 @@ public class GroupController {
                 resp.setStatus(ResponseStatus.SUCCESS);
             }
         }
+        return resp;
+    }
+
+    public AddMemberResponseDto addMember(AddMemberRequestDto request) {
+        String addedByAlias = request.getAddedBy();
+        String groupAlias = request.getGroup();
+        String memberAlias = request.getMember();
+
+        Optional<User> addedUsr;
+        Optional<Group> grp;
+        Optional<User> memberUsr;
+        AddMemberResponseDto resp = new AddMemberResponseDto();
+
+        grp = groupService.findByAlias(groupAlias);
+        if(grp.isEmpty()){
+            resp.setStatus(ResponseStatus.FAILURE);
+            resp.setMessage("Group " + groupAlias + " was not found");
+            return resp;
+        }
+
+        addedUsr = userService.findByAlias(addedByAlias);
+        if(addedUsr.isEmpty()){
+            resp.setMessage("Created by user " + addedByAlias + " was not found");
+            resp.setStatus(ResponseStatus.FAILURE);
+            return resp;
+        }
+
+        memberUsr = userService.findByAlias(memberAlias);
+        if(memberUsr.isEmpty()) {
+            resp.setMessage("Member user " + memberAlias + " was not found");
+            resp.setStatus(ResponseStatus.FAILURE);
+            return resp;
+        }
+
+        groupService.addMemberToGroup(grp.get(), memberUsr.get());
+        resp.setStatus(ResponseStatus.SUCCESS);
+        resp.setMessage("Added user " + memberAlias + " to " + groupAlias);
         return resp;
     }
 }

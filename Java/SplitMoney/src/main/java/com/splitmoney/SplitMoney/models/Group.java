@@ -6,6 +6,8 @@ import lombok.Setter;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.util.List;
+import java.util.Optional;
+
 @Getter
 @Setter
 @Entity
@@ -23,5 +25,21 @@ public class Group extends BaseModel{
     public String getGroupAlias() {
         return "G" + getId();
     }
+    public void addUser(User usr) {
+        this.participants.add(usr);
+    }
 
+    public static Optional<Long> getIdFromAlias(String alias) {
+        if (alias.length() <= 1 || (alias.charAt(0) != 'g' && alias.charAt(0) != 'G')) {
+            return Optional.empty();
+        }
+        Long id;
+        String strId = alias.substring(1);
+        try {
+            id = Long.parseLong(strId);
+            return Optional.of(id);
+        } catch (NumberFormatException e) {
+            return Optional.empty();
+        }
+    }
 }

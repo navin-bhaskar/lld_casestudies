@@ -1,11 +1,8 @@
 package com.splitmoney.splitmoney.controllers;
 
-import com.splitmoney.splitmoney.exceptions.UserNotFound;
-import com.splitmoney.splitmoney.models.Transaction;
-import com.splitmoney.splitmoney.models.User;
-import com.splitmoney.splitmoney.models.UserExpense;
-import com.splitmoney.splitmoney.models.UserExpenseType;
+import com.splitmoney.splitmoney.models.*;
 import com.splitmoney.splitmoney.services.ExpenseService;
+import com.splitmoney.splitmoney.services.GroupService;
 import com.splitmoney.splitmoney.services.UserService;
 import dtos.*;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,11 +16,13 @@ import java.util.Optional;
 public class ExpenseController {
     private ExpenseService expenseService;
     private UserService userService;
+    private GroupService groupService;
 
     @Autowired
-    public ExpenseController(ExpenseService expenseService, UserService userService) {
+    public ExpenseController(ExpenseService expenseService, UserService userService, GroupService groupService) {
         this.expenseService = expenseService;
         this.userService = userService;
+        this.groupService = groupService;
     }
 
     public AddExpenseResponseDto addExpense(AddExpenseRequestDto request) {
@@ -95,8 +94,8 @@ public class ExpenseController {
         return resp;
     }
 
-    public SettleUserResponseDto settleUser(SettleUserRequestDto request) {
-        SettleUserResponseDto resp = new SettleUserResponseDto();
+    public SettleResponseDto settleUser(SettleUserRequestDto request) {
+        SettleResponseDto resp = new SettleResponseDto();
         Optional<User> usr = userService.findByAlias(request.getUser());
         List<Transaction> transactions;
 
@@ -108,6 +107,30 @@ public class ExpenseController {
         transactions = this.expenseService.settleUser(usr.get());
         resp.setStatus(ResponseStatus.SUCCESS);
         resp.setTransactions(transactions);
+        return resp;
+    }
+
+    public SettleResponseDto settleGroup(SettleGroupRequestDto request) {
+        SettleResponseDto resp = new SettleResponseDto();
+        Optional<User> requestedUsr = userService.findByAlias(request.getRequestedBy());
+        Optional<Group> group;
+        List<Transaction> transactions;
+
+        if(requestedUsr.isEmpty()) {
+            resp.setMessage(UserService.getUsrNotFoundMsg(request.getRequestedBy()));
+            resp.setStatus(ResponseStatus.FAILURE);
+        }
+
+        group = groupService.findByAlias(request.getGroup());
+        if(group.isEmpty()) {
+            resp.setMessage(GroupService.getGrpNotFoundMsg(request.getGroup()));
+            resp.setStatus(ResponseStatus.FAILURE);
+            return resp;
+        }
+
+        transactions = expenseService.settleGroup(group.get());
+        resp.setTransactions(transactions);
+        resp.setStatus(ResponseStatus.SUCCESS);
         return resp;
     }
 }
