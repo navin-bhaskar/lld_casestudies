@@ -17,3 +17,6 @@ Uses sqlalchemy for ORM install it using `pip install sqlalchemy`
    - Moderator: Can close any question in addition to memeber operations
    - Admin: Can ban any user in addition to moderator operations
 5. Users must be able to search for questions
+   - By title (will use some sort of reg ex)
+   - By tags
+6. Users must not be able to answer a closed question

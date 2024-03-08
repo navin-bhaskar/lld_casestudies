@@ -1,11 +1,11 @@
 from commands.command import Command
-from services.question import QuestionService
+from controllers.question_controller import QuestionController
 
 
 class PostQuestion(Command):
     def __init__(self) -> None:
         super().__init__("ask_as")
-        self._q_service = QuestionService()
+        self._q_service = QuestionController()
 
     def get_help(self):
         return """Ask a question with system generated user id"""

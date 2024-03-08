@@ -7,5 +7,5 @@ class AddQuestionResponseDto:
         return self._question_id
 
     @question_id.setter
-    def title(self, val):
+    def question_id(self, val):
         self._question_id = val
