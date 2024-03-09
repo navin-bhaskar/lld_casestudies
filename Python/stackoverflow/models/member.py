@@ -13,7 +13,6 @@ class Member(Base, BaseMixin):
     memeber_type = Column(String(length=30))
     name = Column(String(length=50))
     email = Column(String(length=100))
-    # role = Column(Enum(userroles.UserRoles))
     reputation_points = Column(Integer, default=0)
 
     __mapper_args__ = {

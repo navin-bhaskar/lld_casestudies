@@ -11,8 +11,7 @@ class AnswerRepo:
                 title=title,
                 description=description,
                 votes=0,
-                state=QuestionState.open,
-                answered_by=answered_by.user_id,
+                answered_by=answered_by,
                 question_id=question_id,
             )
             session.add(ans)

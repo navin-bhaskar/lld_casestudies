@@ -9,7 +9,7 @@ from enums.votetype import VoteType
 class AnswerUserVote(Base, BaseMixin):
     __tablename__ = "question_user_vote"
     id = Column(Integer, primary_key=True, autoincrement=True)
-    user_id = Column(Integer, ForeignKey("users.id"))
+    user_id = Column(Integer, ForeignKey("memebers.id"))
     answer_id = Column(Integer, ForeignKey("answers.id"))
     vote_type = Column(Enum(VoteType))
 

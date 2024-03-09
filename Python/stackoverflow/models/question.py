@@ -1,5 +1,6 @@
 from sqlalchemy import Column, ForeignKey, String, Integer, create_engine, Enum
 from sqlalchemy.orm import relationship
+from models.answer import Answer
 
 from models.base import Base
 from models.basemixin import BaseMixin
@@ -16,7 +17,7 @@ class Question(Base, BaseMixin):
     closing_remark = Column
 
     asked_by = Column(Integer, ForeignKey("members.user_id"))
-    answers = relationship("Answer", back_populates="question_id")
+    answers = relationship("Answer", primaryjoin=question_id == Answer.question_id)
 
     def __repr__(self):
         return "<Question(title={0})>".format(self.title)

@@ -1,5 +1,6 @@
 from appconfig.appconfig import AppConfig
 from sqlalchemy.orm import sessionmaker
+from models.answer import Answer
 
 from models.base import Base
 from models.question import Question
@@ -16,6 +17,7 @@ def init_models():
     engine = AppConfig().get_engine()
     Member.register()
     Question.register()
+    Answer.register()
     Base.metadata.create_all(engine)
 
 
