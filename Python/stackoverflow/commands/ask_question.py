@@ -1,5 +1,7 @@
 from commands.command import Command
 from controllers.question_controller import QuestionController
+from dto.add_question_dto import AddQuestionDto
+from dto.add_question_response_dto import AddQuestionResponseDto
 
 
 class PostQuestion(Command):
@@ -15,5 +17,10 @@ class PostQuestion(Command):
         description = input("Describe your question: ")
         asked_by = input("Who is asking this question (eg U_1, U_2 ...)? ")
 
-        question = self._q_service.ask(title, description, asked_by)
-        print("Created question with id " + question)
+        req: AddQuestionDto = AddQuestionDto()
+        req.asked_by = asked_by
+        req.title = title
+        req.description = description
+
+        question: AddQuestionResponseDto = self._q_service.ask(req)
+        print("Created question with id " + question.question_id)

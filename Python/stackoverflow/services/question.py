@@ -32,7 +32,7 @@ class QuestionService:
         except ValueError:
             raise QuestionNotFound(q_id)
         try:
-            question: Question = self.get_user_by_id(q_id)
+            question: Question = self.get_question_by_id(q_id)
             return question
         except QuestionNotFound:
             raise QuestionNotFound(q_id)

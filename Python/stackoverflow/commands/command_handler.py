@@ -1,11 +1,12 @@
+from commands.add_answer import AddAnswer
 from commands.add_user import AddUser
-from commands.post_question import PostQuestion
+from commands.ask_question import PostQuestion
 
 
 class CommandHandler:
 
     def __init__(self) -> None:
-        self._commands_list = [AddUser(), PostQuestion()]
+        self._commands_list = [AddUser(), PostQuestion(), AddAnswer()]
         self._cmd_lookup = dict()
         self._all_help = ""
 

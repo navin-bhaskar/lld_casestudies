@@ -29,5 +29,5 @@ Then create a new db schema with name 'so'
 Start the application by running `python app.py` from the root directory to start the application.
 You can get help for all commands by typing in 'help'.
 
-- To add a user use "add_user" command
-- To add a question use "ask_as"
+- To add an user use "add_user" command
+- To add a question use "ask_as" cmmand

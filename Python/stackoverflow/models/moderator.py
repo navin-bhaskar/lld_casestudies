@@ -5,8 +5,6 @@ from models.member import Member
 
 
 class Moderator(Member):
-    __tablename__ = "users"
-    __table_args__ = {"mysql_engine": "InnoDB"}
 
     __mapper_args__ = {
         "polymorphic_identity": "moderator",
