@@ -16,7 +16,7 @@ class Question(Base, BaseMixin):
     closing_remark = Column
 
     asked_by = Column(Integer, ForeignKey("members.user_id"))
-    # answers = relationship("Answer")
+    answers = relationship("Answer", back_populates="question_id")
 
     def __repr__(self):
         return "<Question(title={0})>".format(self.title)

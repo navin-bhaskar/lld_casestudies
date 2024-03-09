@@ -12,7 +12,7 @@ class Answer(Base, BaseMixin):
     description = Column(String(length=500))
     votes = Column(Integer)
     answered_by = Column(Integer, ForeignKey("members.user_id"))
-    question = relationship("Question.question_id")
+    question_id = relationship("Question.question_id")
 
     def __repr__(self):
         return "<Answer(title={0})>".format(self.title)
