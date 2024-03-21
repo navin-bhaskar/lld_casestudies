@@ -10,10 +10,11 @@ The application draws a tile using Pygame and traces the path to the bottom righ
 To run the app you need Python 3.12.
 Run `python -m pip install pipenv` to install pipenv
 Run
-`pipenv install         # Install all the required packages
+```
+pipenv install         # Install all the required packages
 pipenv shell
 python src/bfs_dfs.py  # To run the application`
-
+```
 # Legend
 
 Orange color tile - Source
