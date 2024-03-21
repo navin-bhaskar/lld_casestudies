@@ -19,7 +19,7 @@ class UserService:
 
     def add_user(self, user_name: str, user_email: str, role: UserRoles) -> str:
         usr: Member = self._usr_repo.add_user(user_name, user_email, role)
-        return get_entity_name_from_id(usr.user_id, PREFIX)
+        return usr
 
     def get_user_by_id(self, user_id: int) -> Member:
         usr: Member = self._usr_repo.get_by_id(user_id)
