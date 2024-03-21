@@ -11,8 +11,9 @@ class CommandHandler:
         self._all_help = ""
 
         for cmd in self._commands_list:
-            self._cmd_lookup[cmd.get_name()] = cmd
-            self._all_help += cmd.get_help() + "\n"
+            cmd_name: str = cmd.get_name()
+            self._cmd_lookup[cmd_name] = cmd
+            self._all_help += cmd_name + ": " + cmd.get_help() + "\n"
 
     def execute_cmd(self, line: str):
         cmd = line.strip().lower()
