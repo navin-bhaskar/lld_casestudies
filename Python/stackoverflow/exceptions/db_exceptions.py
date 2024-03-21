@@ -1,4 +1,8 @@
-class EnitityNotFound(Exception):
+class SOException(Exception):
+    pass
+
+
+class EnitityNotFound(SOException):
     pass
 
 
